@@ -1,3 +1,10 @@
+---
+output:
+  pdf_document: default
+  html_document:
+    keep_md: yes
+    theme: flatly
+---
 ```{r setup, message=FALSE, echo=FALSE}
 # generates simulated spatial (raster) datasets if not installed, the
 # RandomFields library can be installed using this command:

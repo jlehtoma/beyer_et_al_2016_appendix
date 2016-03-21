@@ -262,7 +262,7 @@ names(spps) <- paste0("species", 1:ns)
 plot(spps, nc = 3, nr = 4)
 ```
 
-![plot of chunk plot-species](figure/plot-species-1.png)
+![](analysis_files/figure-html/plot-species-1.png)
 
 ### 2. Simulate the cost associated with selecting each planning unit
 
@@ -290,7 +290,7 @@ cost <- GaussRF(x = x, y = y, model = model, grid = TRUE,
 plot(raster(cost), main = "Cost")
 ```
 
-![plot of chunk plot-cost](figure/plot-cost-1.png)
+![](analysis_files/figure-html/plot-cost-1.png)
 
 
 ## C.3 Solving the basic reserve selection problem using ILP
@@ -344,7 +344,17 @@ This example assumes that the relevant spatial datasets have been loaded in R
 # load the gurobi R package (requires that both Gurobi and the Gurobi R package 
 # have both been installed): 
 require(gurobi)
+```
 
+```
+## Loading required package: gurobi
+```
+
+```
+## Loading required package: slam
+```
+
+```r
 # re-specify the number of rows and columns of the raster if they are not 
 # already set in R: 
 nr <- 100 # rows 
@@ -406,13 +416,13 @@ result <- gurobi(model,params)
 ##   Bounds range    [1e+00, 1e+00]
 ##   RHS range       [1e+03, 5e+03]
 ## Found heuristic solution: objective 3.41861e+06
-## Presolve time: 0.07s
+## Presolve time: 0.06s
 ## Presolved: 10 rows, 10000 columns, 50850 nonzeros
 ## Variable types: 0 continuous, 10000 integer (10000 binary)
 ## Presolved: 10 rows, 10000 columns, 50850 nonzeros
 ## 
 ## 
-## Root relaxation: objective 1.572765e+06, 58 iterations, 0.04 seconds
+## Root relaxation: objective 1.572765e+06, 58 iterations, 0.03 seconds
 ## 
 ##     Nodes    |    Current Node    |     Objective Bounds      |     Work
 ##  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
@@ -420,7 +430,7 @@ result <- gurobi(model,params)
 ##      0     0 1572765.40    0   10 3418605.08 1572765.40  54.0%     -    0s
 ## H    0     0                    1574210.0984 1572765.40  0.09%     -    0s
 ## 
-## Explored 0 nodes (58 simplex iterations) in 0.30 seconds
+## Explored 0 nodes (58 simplex iterations) in 0.28 seconds
 ## Thread count was 4 (of 4 available processors)
 ## 
 ## Optimal solution found (tolerance 5.00e-03)
@@ -428,7 +438,7 @@ result <- gurobi(model,params)
 ```
 
 The result object contains several data objects including the objective value 
-achieved (`result$objval` = 1.5742101 &times; 10<sup>6</sup>) and the vector of decision 
+achieved (`result$objval` = 1.5742101\times 10^{6}) and the vector of decision 
 variable values (0 or 1 in our example because the variables are binary).
 
 
@@ -437,7 +447,7 @@ reserve_network <- matrix(result$x, ncol = nc, nrow = nr)
 image(reserve_network, col = c("white", "black"))
 ```
 
-![plot of chunk plot-optimal-reserve](figure/plot-optimal-reserve-1.png)
+![](analysis_files/figure-html/plot-optimal-reserve-1.png)
 
 ## C.4 Solving the Marxan optimisation problem using ILP
 
@@ -559,7 +569,13 @@ available.
 require(gurobi) 
 # load the Matrix package for sparse matrices 
 require(Matrix)
+```
 
+```
+## Loading required package: Matrix
+```
+
+```r
 # re-specify the number of rows and columns of the raster if they are not 
 # already set in R: 
 nr <- 100 # rows 
@@ -693,7 +709,7 @@ result <- gurobi(model, params)
 ##   RHS range       [1e+03, 5e+03]
 ## Found heuristic solution: objective 3.41861e+06
 ## Presolve removed 79200 rows and 39600 columns
-## Presolve time: 0.11s
+## Presolve time: 0.09s
 ## Presolved: 10 rows, 10000 columns, 50850 nonzeros
 ## Variable types: 0 continuous, 10000 integer (10000 binary)
 ## Presolved: 10 rows, 10000 columns, 50850 nonzeros
@@ -707,7 +723,7 @@ result <- gurobi(model, params)
 ##      0     0 1572765.40    0   10 3418605.08 1572765.40  54.0%     -    0s
 ## H    0     0                    1574210.0984 1572765.40  0.09%     -    0s
 ## 
-## Explored 0 nodes (58 simplex iterations) in 0.35 seconds
+## Explored 0 nodes (58 simplex iterations) in 0.30 seconds
 ## Thread count was 4 (of 4 available processors)
 ## 
 ## Optimal solution found (tolerance 5.00e-03)
@@ -724,7 +740,7 @@ reserve_network <- matrix(result$x, ncol = nc, nrow = nr)
 image(reserve_network, col = c("white", "black"))
 ```
 
-![plot of chunk plot-optimal-reserve-2](figure/plot-optimal-reserve-2-1.png)
+![](analysis_files/figure-html/plot-optimal-reserve-2-1.png)
 
 ### C.4.3 Calculating the Pareto frontier
 
