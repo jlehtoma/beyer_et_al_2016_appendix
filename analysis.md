@@ -416,13 +416,13 @@ result <- gurobi(model,params)
 ##   Bounds range    [1e+00, 1e+00]
 ##   RHS range       [1e+03, 5e+03]
 ## Found heuristic solution: objective 3.41861e+06
-## Presolve time: 0.06s
+## Presolve time: 0.07s
 ## Presolved: 10 rows, 10000 columns, 50850 nonzeros
 ## Variable types: 0 continuous, 10000 integer (10000 binary)
 ## Presolved: 10 rows, 10000 columns, 50850 nonzeros
 ## 
 ## 
-## Root relaxation: objective 1.572765e+06, 58 iterations, 0.03 seconds
+## Root relaxation: objective 1.572765e+06, 58 iterations, 0.04 seconds
 ## 
 ##     Nodes    |    Current Node    |     Objective Bounds      |     Work
 ##  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
@@ -430,7 +430,7 @@ result <- gurobi(model,params)
 ##      0     0 1572765.40    0   10 3418605.08 1572765.40  54.0%     -    0s
 ## H    0     0                    1574210.0984 1572765.40  0.09%     -    0s
 ## 
-## Explored 0 nodes (58 simplex iterations) in 0.28 seconds
+## Explored 0 nodes (58 simplex iterations) in 0.33 seconds
 ## Thread count was 4 (of 4 available processors)
 ## 
 ## Optimal solution found (tolerance 5.00e-03)
@@ -715,7 +715,7 @@ result <- gurobi(model, params)
 ## Presolved: 10 rows, 10000 columns, 50850 nonzeros
 ## 
 ## 
-## Root relaxation: objective 1.572765e+06, 58 iterations, 0.04 seconds
+## Root relaxation: objective 1.572765e+06, 58 iterations, 0.03 seconds
 ## 
 ##     Nodes    |    Current Node    |     Objective Bounds      |     Work
 ##  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
@@ -754,6 +754,7 @@ between them requires trial and error.
 ```r
 # create a vector of penalty values to use: 
 pen <- seq(0, 175, 25)
+#pen <- seq(0, 50, 25)
 # create some empty data objects to store the objective values and solutions for 
 # visualisation:
 sols <- list() 
@@ -766,8 +767,8 @@ for (p in 1:length(pen)) {
   result <- gurobi(model, params) 
   sols[[p]] <- result$x 
   solcost[p] <- result$objval 
-  #save(sols, file = "sols.RData") 
-  #save(solcost, file="solcost.RData")
+  save(sols, file = "sols.RData") 
+  save(solcost, file="solcost.RData")
 }
 ```
 
@@ -775,3 +776,24 @@ Note that the above code saves the sols and solcost results objects within the
 loop. This is precautionary. For some problems the optimisation can take a 
 considerable amount of time to run and if the objects are not saved regularly 
 they could be lost if there is a problem with the computer.
+
+
+```r
+# Make a RasterStack for plotting purposes
+solutions <- stack()
+
+sols_mtrxs <- list()
+
+for (i in 1:length(sols)) {
+  sols_mtrxs[[i]] <- matrix(sols[[i]], ncol = nc, nrow = nr)
+}
+
+for (i in 1:length(sols)) {
+  solutions <- addLayer(solutions, raster(sols_mtrxs[[i]]))
+}
+solutions <- addLayer(solutions, raster(cost))
+names(solutions) <- c(paste0("solution", 1:length(sols)), "cost")
+
+plot(solutions, nc = 3, nr = 3)
+plot(pen, solcost, type="l", xlab="Penalty", ylab="Solution cost")
+```

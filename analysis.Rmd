@@ -1,9 +1,10 @@
 ---
 output:
-  pdf_document: default
   html_document:
     keep_md: yes
     theme: flatly
+  pdf_document:
+    latex_engine: xelatex
 ---
 ```{r setup, message=FALSE, echo=FALSE}
 # generates simulated spatial (raster) datasets if not installed, the
@@ -296,9 +297,18 @@ cost <- GaussRF(x = x, y = y, model = model, grid = TRUE,
 # load(file="cost.RData")
 ```
 
+
 ```{r plot-cost, fig.width=5, fig.height=5}
 plot(raster(cost), main = "Cost")
 ```
+
+```{r create-cost-equal, warning=FALSE}
+
+# Create equal cost surface
+cost_equal <- raster(matrix(rep(1, nr * nc), nrow = nr, ncol = nc))
+
+```
+
 
 
 ## C.3 Solving the basic reserve selection problem using ILP
@@ -379,7 +389,7 @@ sense <- rep(">=", ns)
 # set the targets (the right hand side of the constraint equations); here, we 
 # assume that 25% of the total value of each species raster must be met or 
 # exceeded: 
-targetlevel <- 0.25 
+targetlevel <- 0.05 
 rhs <- rep(0, ns) 
 for (i in 1:ns) { 
   rhs[i] <- targetlevel * sum(spp[i,,])
@@ -393,7 +403,7 @@ model$modelsense <- "min"
 # set all decision variables as binary: 
 model$vtype <- "B" 
 # vector of state values that are being minimised (costs in our example): 
-model$obj <- as.vector(t(cost)) 
+model$obj <- as.vector(t(cost_equal)) 
 # assign the constraints matrix object, and the right hand side and sense vectors: 
 model$A <- constr 
 model$rhs <- rhs 
@@ -685,6 +695,7 @@ between them requires trial and error.
 
 # create a vector of penalty values to use: 
 pen <- seq(0, 175, 25)
+#pen <- seq(0, 50, 25)
 # create some empty data objects to store the objective values and solutions for 
 # visualisation:
 sols <- list() 
@@ -697,8 +708,8 @@ for (p in 1:length(pen)) {
   result <- gurobi(model, params) 
   sols[[p]] <- result$x 
   solcost[p] <- result$objval 
-  #save(sols, file = "sols.RData") 
-  #save(solcost, file="solcost.RData")
+  save(sols, file = "sols.RData") 
+  save(solcost, file="solcost.RData")
 }
 
 ```
@@ -707,3 +718,23 @@ Note that the above code saves the sols and solcost results objects within the
 loop. This is precautionary. For some problems the optimisation can take a 
 considerable amount of time to run and if the objects are not saved regularly 
 they could be lost if there is a problem with the computer.
+
+```{r plot-multi-solutions, eval=FALSE}
+# Make a RasterStack for plotting purposes
+solutions <- stack()
+
+sols_mtrxs <- list()
+
+for (i in 1:length(sols)) {
+  sols_mtrxs[[i]] <- matrix(sols[[i]], ncol = nc, nrow = nr)
+}
+
+for (i in 1:length(sols)) {
+  solutions <- addLayer(solutions, raster(sols_mtrxs[[i]]))
+}
+solutions <- addLayer(solutions, raster(cost))
+names(solutions) <- c(paste0("solution", 1:length(sols)), "cost")
+
+plot(solutions, nc = 3, nr = 3)
+plot(pen, solcost, type="l", xlab="Penalty", ylab="Solution cost")
+```
