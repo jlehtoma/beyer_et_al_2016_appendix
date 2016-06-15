@@ -40,15 +40,15 @@ protection to unrestricted commercial fishery.
 
 MarxanWith Zones solves the following optimisation problem:
 
-$min \sum_{i=1}^{N} \sum_{k=1}^{Z} c_{ik}x_{ik} +  \sum_{k=1}^{Z} \sum_{m=1}^{Z} b_{km} \sum_{i=1}^{N} \sum_{j=1}^{N} x_{ik}x_{jm}v_{ijkm}$  
+$$min \sum_{i=1}^{N} \sum_{k=1}^{Z} c_{ik}x_{ik} +  \sum_{k=1}^{Z} \sum_{m=1}^{Z} b_{km} \sum_{i=1}^{N} \sum_{j=1}^{N} x_{ik}x_{jm}v_{ijkm}$$  
   
-s.t $\sum_{k=1}^{Z} x_{ik} = 1, i \in N$ 
+$$s.t \sum_{k=1}^{Z} x_{ik} = 1, i \in N$$ 
   
-$\sum_{i=1}^{N} \sum_{k=1}^{Z} a_{ij}p_{jk}x_{ij} \geq T_{j},j \in N$
+$$\sum_{i=1}^{N} \sum_{k=1}^{Z} a_{ij}p_{jk}x_{ij} \geq T_{j},j \in N$$
   
-$\sum_{i=1}^{N} a_{ij}x_{ik} \geq U_{jk},j \in N,k \in K$
+$$\sum_{i=1}^{N} a_{ij}x_{ik} \geq U_{jk},j \in N,k \in K$$
 
-$x_{i} \in \{0,1\},i \in N$
+$$x_{i} \in \{0,1\},i \in N$$
 
 where $N$ and $Z$ refer to the number of planning units and zones (actions) 
 respectively, $x_{ik}$ is a binary decision variable that is 1 when unit $i$ is 
@@ -96,7 +96,7 @@ quadratic expression $x_{ik}x_{jm}$, which can be linearised by replacing it
 with a new decision variable $z_{ijkm}$ and implementing the following 
 additional constraints:  
  
-$z_{ijkm} - x_{ik} - x_{jm} \leq -1$
+$$z_{ijkm} - x_{ik} - x_{jm} \leq -1$$
 
 This constraint ensures that $z_{ijkm} = 1$ when $x_{ik} = x_{jm} = 1$, and 
 that $z_{ij} = 0$ when either $x_{ik} = 0$ or $x_{jm} = 0$. Note that this 
@@ -105,7 +105,7 @@ objective function because the sign of the quadratic term differs. We can also
 express the objective function using set notation, which makes it clearer that 
 the penalty term is only evaluated for neighbours:
 
-$min \sum_{i=1}^{N} \sum_{k=1}^{Z} c_{ik}x_{ik} +  \sum_{k=1}^{Z} \sum_{m=1}^{Z} b_{km} \sum_{(i,j) \in E} x_{ik}x_{jm}v_{ijkm}$
+$$min \sum_{i=1}^{N} \sum_{k=1}^{Z} c_{ik}x_{ik} +  \sum_{k=1}^{Z} \sum_{m=1}^{Z} b_{km} \sum_{(i,j) \in E} x_{ik}x_{jm}v_{ijkm}$$
 
 where $E$ defines the set of all neighbouring planning units.
 
@@ -126,7 +126,7 @@ to allow no zone assignment to some units in cases where only a subset of unit
 and zone combinations are required to meet targets. This can be achieved by 
 changing the first constraint to:
 
-$\sum_{k=1}^{Z} x_{ik} \leq 1,$  
+$$\sum_{k=1}^{Z} x_{ik} \leq 1,$$  
 
 thereby relaxing the constraint that forces all planning units to be assigned to 
 exactly one zone.
@@ -149,8 +149,8 @@ Similarly, to prevent the assignment of incompatible zones in adjacent planning
 units (e.g. a dredge spoil dump next to a marine protected area) two constraints 
 can be implemented:
 
-$x_{ik} + x_{jm} \leq 1, i \in N, j \in N$  
-$x_{im} + x_{jk} \leq 1, i \in N, j \in N$
+$$x_{ik} + x_{jm} \leq 1, i \in N, j \in N$$ 
+$$x_{im} + x_{jk} \leq 1, i \in N, j \in N$$
 
 where $k$ and $m$ are the incompatible zones.
 
@@ -262,7 +262,7 @@ names(spps) <- paste0("species", 1:ns)
 plot(spps, nc = 3, nr = 4)
 ```
 
-![](analysis_files/figure-html/plot-species-1.png)
+![](analysis_files/figure-html/plot-species-1.png)<!-- -->
 
 ### 2. Simulate the cost associated with selecting each planning unit
 
@@ -286,11 +286,19 @@ cost <- GaussRF(x = x, y = y, model = model, grid = TRUE,
 ```
 
 
+
 ```r
 plot(raster(cost), main = "Cost")
 ```
 
-![](analysis_files/figure-html/plot-cost-1.png)
+![](analysis_files/figure-html/plot-cost-1.png)<!-- -->
+
+
+```r
+# Create equal cost surface
+cost_equal <- raster(matrix(rep(1, nr * nc), nrow = nr, ncol = nc))
+```
+
 
 
 ## C.3 Solving the basic reserve selection problem using ILP
@@ -381,7 +389,7 @@ sense <- rep(">=", ns)
 # set the targets (the right hand side of the constraint equations); here, we 
 # assume that 25% of the total value of each species raster must be met or 
 # exceeded: 
-targetlevel <- 0.25 
+targetlevel <- 0.05 
 rhs <- rep(0, ns) 
 for (i in 1:ns) { 
   rhs[i] <- targetlevel * sum(spp[i,,])
@@ -395,7 +403,7 @@ model$modelsense <- "min"
 # set all decision variables as binary: 
 model$vtype <- "B" 
 # vector of state values that are being minimised (costs in our example): 
-model$obj <- as.vector(t(cost)) 
+model$obj <- as.vector(t(cost_equal)) 
 # assign the constraints matrix object, and the right hand side and sense vectors: 
 model$A <- constr 
 model$rhs <- rhs 
@@ -412,33 +420,34 @@ result <- gurobi(model,params)
 ## Optimize a model with 10 rows, 10000 columns and 50850 nonzeros
 ## Coefficient statistics:
 ##   Matrix range    [2e-04, 9e+00]
-##   Objective range [1e+03, 1e+03]
+##   Objective range [1e+00, 1e+00]
 ##   Bounds range    [1e+00, 1e+00]
-##   RHS range       [1e+03, 5e+03]
-## Found heuristic solution: objective 3.41861e+06
-## Presolve time: 0.07s
+##   RHS range       [2e+02, 9e+02]
+## Found heuristic solution: objective 729
+## Presolve time: 0.05s
 ## Presolved: 10 rows, 10000 columns, 50850 nonzeros
 ## Variable types: 0 continuous, 10000 integer (10000 binary)
 ## Presolved: 10 rows, 10000 columns, 50850 nonzeros
 ## 
 ## 
-## Root relaxation: objective 1.572765e+06, 58 iterations, 0.04 seconds
+## Root relaxation: objective 2.607932e+02, 51 iterations, 0.03 seconds
 ## 
 ##     Nodes    |    Current Node    |     Objective Bounds      |     Work
 ##  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 ## 
-##      0     0 1572765.40    0   10 3418605.08 1572765.40  54.0%     -    0s
-## H    0     0                    1574210.0984 1572765.40  0.09%     -    0s
+##      0     0  260.79323    0   10  729.00000  260.79323  64.2%     -    0s
+## H    0     0                     263.0000000  260.79323  0.84%     -    0s
+## H    0     0                     262.0000000  260.79323  0.46%     -    0s
 ## 
-## Explored 0 nodes (58 simplex iterations) in 0.33 seconds
+## Explored 0 nodes (51 simplex iterations) in 0.27 seconds
 ## Thread count was 4 (of 4 available processors)
 ## 
 ## Optimal solution found (tolerance 5.00e-03)
-## Best objective 1.574210098374e+06, best bound 1.572765404712e+06, gap 0.0918%
+## Best objective 2.620000000000e+02, best bound 2.610000000000e+02, gap 0.3817%
 ```
 
 The result object contains several data objects including the objective value 
-achieved (`result$objval` = 1.5742101\times 10^{6}) and the vector of decision 
+achieved (`result$objval` = 262) and the vector of decision 
 variable values (0 or 1 in our example because the variables are binary).
 
 
@@ -447,7 +456,7 @@ reserve_network <- matrix(result$x, ncol = nc, nrow = nr)
 image(reserve_network, col = c("white", "black"))
 ```
 
-![](analysis_files/figure-html/plot-optimal-reserve-1.png)
+![](analysis_files/figure-html/plot-optimal-reserve-1.png)<!-- -->
 
 ## C.4 Solving the Marxan optimisation problem using ILP
 
@@ -723,7 +732,7 @@ result <- gurobi(model, params)
 ##      0     0 1572765.40    0   10 3418605.08 1572765.40  54.0%     -    0s
 ## H    0     0                    1574210.0984 1572765.40  0.09%     -    0s
 ## 
-## Explored 0 nodes (58 simplex iterations) in 0.30 seconds
+## Explored 0 nodes (58 simplex iterations) in 0.31 seconds
 ## Thread count was 4 (of 4 available processors)
 ## 
 ## Optimal solution found (tolerance 5.00e-03)
@@ -740,7 +749,7 @@ reserve_network <- matrix(result$x, ncol = nc, nrow = nr)
 image(reserve_network, col = c("white", "black"))
 ```
 
-![](analysis_files/figure-html/plot-optimal-reserve-2-1.png)
+![](analysis_files/figure-html/plot-optimal-reserve-2-1.png)<!-- -->
 
 ### C.4.3 Calculating the Pareto frontier
 

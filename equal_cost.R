@@ -31,19 +31,26 @@ nugget <- 1
 scale <- 20
 alpha <- 1
 
-# species array
-spp <- array(0, dim = c(ns, nr, nc))
-for (i in 1:ns) {
-  f <- GaussRF(x = x, y = y, model = model, grid = TRUE,
-               param = c(mean, variance, nugget, scale, alpha))
-  f[which(f < 0)] <- 0
-  spp[i,,] <- f
-}
+# Dynamically create species cache file
+spp_cache_file <- file.path("cache", paste0("spp_", nr, "x", nc, ".RData"))
 
-# save the species data as an R data object
-# save(spp, file="spp.RData")
-# the data can subsequently be reloaded using this command:
-# load(file="spp.RData")
+# If species data for this dimension (nr * nc) exists, load that instead of
+# recreating it.
+if (file.exists(spp_cache_file)) {
+  load(spp_cache_file)
+} else {
+  # species array
+  spp <- array(0, dim = c(ns, nr, nc))
+  for (i in 1:ns) {
+    message("Creating species ", i)
+    f <- GaussRF(x = x, y = y, model = model, grid = TRUE,
+                 param = c(mean, variance, nugget, scale, alpha))
+    f[which(f < 0)] <- 0
+    spp[i,,] <- f
+  }
+  # save the species data as an R data object
+  save(spp, file = spp_cache_file)
+}
 
 # Make a RasterStack for plotting purposes
 spps <- stack()
@@ -66,23 +73,30 @@ alpha <- 1.5
 x <- seq(0, 100, length.out = nc)
 y <- seq(0, 100, length.out = nr)
 
-cost <- GaussRF(x = x, y = y, model = model, grid = TRUE,
-                param = c(mean, variance, nugget, scale, alpha))
-# save the species data as an R data object
-# save(cost, file="cost.RData")
-# the data can subsequently be reloaded using this command:
-# load(file="cost.RData")
+# Dynamically create cost cache file
+cost_cache_file <- file.path("cache", paste0("cost_", nr, "x", nc, ".RData"))
+
+# If cost data for this dimension (nr * nc) exists, load that instead of
+# recreating it.
+if (file.exists(cost_cache_file)) {
+  load(cost_cache_file)
+} else {
+  cost <- GaussRF(x = x, y = y, model = model, grid = TRUE,
+                  param = c(mean, variance, nugget, scale, alpha))
+  # Save the species data as an R data object
+  save(cost, file = cost_cache_file)
+}
 
 plot(raster(cost), main = "Cost")
 
-# Create equal cost surface
+# Create equal cost surface. This is a cheap operation, no need for caching.
 cost_equal <- raster(matrix(rep(1, nr * nc), nrow = nr, ncol = nc))
 
 plot(cost_equal, main = "Cost equal")
 
 # 3. Optimization ---------------------------------------------------------
 
-# load the gurobi R package (requires that both Gurobi and the Gurobi R package
+# Load the gurobi R package (requires that both Gurobi and the Gurobi R package
 # have both been installed):
 require(gurobi)
 

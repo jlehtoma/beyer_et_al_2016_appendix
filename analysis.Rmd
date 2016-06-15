@@ -55,15 +55,15 @@ protection to unrestricted commercial fishery.
 
 MarxanWith Zones solves the following optimisation problem:
 
-$min \sum_{i=1}^{N} \sum_{k=1}^{Z} c_{ik}x_{ik} +  \sum_{k=1}^{Z} \sum_{m=1}^{Z} b_{km} \sum_{i=1}^{N} \sum_{j=1}^{N} x_{ik}x_{jm}v_{ijkm}$  
+$$min \sum_{i=1}^{N} \sum_{k=1}^{Z} c_{ik}x_{ik} +  \sum_{k=1}^{Z} \sum_{m=1}^{Z} b_{km} \sum_{i=1}^{N} \sum_{j=1}^{N} x_{ik}x_{jm}v_{ijkm}$$  
   
-s.t $\sum_{k=1}^{Z} x_{ik} = 1, i \in N$ 
+$$s.t \sum_{k=1}^{Z} x_{ik} = 1, i \in N$$ 
   
-$\sum_{i=1}^{N} \sum_{k=1}^{Z} a_{ij}p_{jk}x_{ij} \geq T_{j},j \in N$
+$$\sum_{i=1}^{N} \sum_{k=1}^{Z} a_{ij}p_{jk}x_{ij} \geq T_{j},j \in N$$
   
-$\sum_{i=1}^{N} a_{ij}x_{ik} \geq U_{jk},j \in N,k \in K$
+$$\sum_{i=1}^{N} a_{ij}x_{ik} \geq U_{jk},j \in N,k \in K$$
 
-$x_{i} \in \{0,1\},i \in N$
+$$x_{i} \in \{0,1\},i \in N$$
 
 where $N$ and $Z$ refer to the number of planning units and zones (actions) 
 respectively, $x_{ik}$ is a binary decision variable that is 1 when unit $i$ is 
@@ -111,7 +111,7 @@ quadratic expression $x_{ik}x_{jm}$, which can be linearised by replacing it
 with a new decision variable $z_{ijkm}$ and implementing the following 
 additional constraints:  
  
-$z_{ijkm} - x_{ik} - x_{jm} \leq -1$
+$$z_{ijkm} - x_{ik} - x_{jm} \leq -1$$
 
 This constraint ensures that $z_{ijkm} = 1$ when $x_{ik} = x_{jm} = 1$, and 
 that $z_{ij} = 0$ when either $x_{ik} = 0$ or $x_{jm} = 0$. Note that this 
@@ -120,7 +120,7 @@ objective function because the sign of the quadratic term differs. We can also
 express the objective function using set notation, which makes it clearer that 
 the penalty term is only evaluated for neighbours:
 
-$min \sum_{i=1}^{N} \sum_{k=1}^{Z} c_{ik}x_{ik} +  \sum_{k=1}^{Z} \sum_{m=1}^{Z} b_{km} \sum_{(i,j) \in E} x_{ik}x_{jm}v_{ijkm}$
+$$min \sum_{i=1}^{N} \sum_{k=1}^{Z} c_{ik}x_{ik} +  \sum_{k=1}^{Z} \sum_{m=1}^{Z} b_{km} \sum_{(i,j) \in E} x_{ik}x_{jm}v_{ijkm}$$
 
 where $E$ defines the set of all neighbouring planning units.
 
@@ -141,7 +141,7 @@ to allow no zone assignment to some units in cases where only a subset of unit
 and zone combinations are required to meet targets. This can be achieved by 
 changing the first constraint to:
 
-$\sum_{k=1}^{Z} x_{ik} \leq 1,$  
+$$\sum_{k=1}^{Z} x_{ik} \leq 1,$$  
 
 thereby relaxing the constraint that forces all planning units to be assigned to 
 exactly one zone.
@@ -164,8 +164,8 @@ Similarly, to prevent the assignment of incompatible zones in adjacent planning
 units (e.g. a dredge spoil dump next to a marine protected area) two constraints 
 can be implemented:
 
-$x_{ik} + x_{jm} \leq 1, i \in N, j \in N$  
-$x_{im} + x_{jk} \leq 1, i \in N, j \in N$
+$$x_{ik} + x_{jm} \leq 1, i \in N, j \in N$$ 
+$$x_{im} + x_{jk} \leq 1, i \in N, j \in N$$
 
 where $k$ and $m$ are the incompatible zones.
 
